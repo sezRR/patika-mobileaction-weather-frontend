@@ -1,5 +1,12 @@
 <script setup>
-import { useSlots, computed, ref, onMounted, onBeforeUnmount } from "vue";
+import {
+    useSlots,
+    computed,
+    ref,
+    onMounted,
+    onBeforeUnmount,
+    watch,
+} from "vue";
 import MaLabel from "../MaLabel.vue";
 import MaFilterQuickActions from "./MaFilterQuickActions.vue";
 
@@ -31,9 +38,17 @@ function next() {
 function prev() {
     if (currentPage.value > 0) --currentPage.value;
 }
+function goToFirst() {
+    currentPage.value = 0;
+}
+function goToLast() {
+    currentPage.value = totalPages.value - 1;
+}
 function onKey(e) {
     if (e.key === "ArrowRight") next();
     if (e.key === "ArrowLeft") prev();
+    if (e.ctrlKey && e.key === "ArrowRight") goToLast();
+    if (e.ctrlKey && e.key === "ArrowLeft") goToFirst();
 }
 onMounted(() => document.addEventListener("keydown", onKey));
 onBeforeUnmount(() => document.removeEventListener("keydown", onKey));
@@ -41,6 +56,22 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKey));
 /* ---------- selection logic -------------------------------------------- */
 const selected = ref(new Set()); // stores global indices
 const lastClickedIdx = ref(null); // last clicked index
+
+// Auto-select all items when the range changes or on initial load
+watch(
+    () => allChildren.value.length,
+    (newLength) => {
+        if (newLength > 0) {
+            // Reset to page 0 when date range changes
+            currentPage.value = 0;
+            // Select all items in the new range
+            selected.value = new Set(
+                Array.from({ length: newLength }, (_, i) => i)
+            );
+        }
+    },
+    { immediate: true } // Run immediately on mount
+);
 
 function toggleSingle(idx, event) {
     /* decide action based on *previous* item’s current state */
@@ -73,6 +104,42 @@ const selectCurrentPage = () => {
 };
 
 const removeAll = () => selected.value.clear();
+
+const removeCurrentPage = () => {
+    const currentPageStart = currentPage.value * ITEMS_PER_PAGE;
+    const currentPageIndices = paginatedChildren.value.map(
+        (_, localIdx) => currentPageStart + localIdx
+    );
+    // Remove current page items from selections
+    currentPageIndices.forEach((idx) => selected.value.delete(idx));
+};
+
+/* ---------- computed disable states ------------------------------------ */
+const isAllSelected = computed(
+    () =>
+        selected.value.size === allChildren.value.length &&
+        allChildren.value.length > 0
+);
+
+const isAllDeselected = computed(() => selected.value.size === 0);
+
+const isCurrentPageAllSelected = computed(() => {
+    if (paginatedChildren.value.length === 0) return false;
+    const currentPageStart = currentPage.value * ITEMS_PER_PAGE;
+    const currentPageIndices = paginatedChildren.value.map(
+        (_, localIdx) => currentPageStart + localIdx
+    );
+    return currentPageIndices.every((idx) => selected.value.has(idx));
+});
+
+const isCurrentPageAllDeselected = computed(() => {
+    if (paginatedChildren.value.length === 0) return true;
+    const currentPageStart = currentPage.value * ITEMS_PER_PAGE;
+    const currentPageIndices = paginatedChildren.value.map(
+        (_, localIdx) => currentPageStart + localIdx
+    );
+    return currentPageIndices.every((idx) => !selected.value.has(idx));
+});
 
 const selectOneWeek = () => {
     const currentPageStart = currentPage.value * ITEMS_PER_PAGE;
@@ -112,16 +179,39 @@ const placeholderCount = computed(
 
 <template>
     <div class="flex flex-col gap-2">
-        <MaLabel>Filter dates</MaLabel>
+        <!-- header aligned with filter items --------------------------------- -->
+        <div class="flex items-center gap-2">
+            <!-- spacer for pagination buttons to align header with filter items -->
+            <div class="flex gap-2">
+                <!-- invisible spacers matching pagination button widths -->
+                <div class="px-2 opacity-0 pointer-events-none select-none">
+                    ‹‹
+                </div>
+                <div class="px-2 opacity-0 pointer-events-none select-none">
+                    ‹
+                </div>
+            </div>
+            <MaLabel>Filter dates</MaLabel>
+        </div>
 
         <!-- filter strip ----------------------------------------------------- -->
         <div class="flex flex-wrap items-center gap-2">
-            <!-- ‹ -->
+            <!-- ‹‹ (go to first) - always visible -->
             <button
-                v-if="totalPages > 1"
-                class="px-2 text-stone-400 disabled:opacity-40"
-                :disabled="currentPage === 0"
+                class="px-2 text-stone-400 disabled:opacity-40 hover:text-stone-600 disabled:hover:text-stone-400"
+                :disabled="currentPage === 0 || totalPages <= 1"
+                @click="goToFirst"
+                title="Go to first page (Ctrl + ←)"
+            >
+                ‹‹
+            </button>
+
+            <!-- ‹ (previous) - always visible -->
+            <button
+                class="px-2 text-stone-400 disabled:opacity-40 hover:text-stone-600 disabled:hover:text-stone-400"
+                :disabled="currentPage === 0 || totalPages <= 1"
                 @click="prev"
+                title="Previous page (←)"
             >
                 ‹
             </button>
@@ -153,29 +243,58 @@ const placeholderCount = computed(
                 style="height: 2.5rem; width: 4rem"
             ></div>
 
-            <!-- › -->
+            <!-- › (next) - always visible -->
             <button
-                v-if="totalPages > 1"
-                class="px-2 text-stone-400 disabled:opacity-40"
-                :disabled="currentPage === totalPages - 1"
+                class="px-2 text-stone-400 disabled:opacity-40 hover:text-stone-600 disabled:hover:text-stone-400"
+                :disabled="currentPage === totalPages - 1 || totalPages <= 1"
                 @click="next"
+                title="Next page (→)"
             >
                 ›
             </button>
+
+            <!-- ›› (go to last) - always visible -->
+            <button
+                class="px-2 text-stone-400 disabled:opacity-40 hover:text-stone-600 disabled:hover:text-stone-400"
+                :disabled="currentPage === totalPages - 1 || totalPages <= 1"
+                @click="goToLast"
+                title="Go to last page (Ctrl + →)"
+            >
+                ››
+            </button>
         </div>
 
-        <!-- footer bar ------------------------------------------------------- -->
-        <MaFilterQuickActions
-            :selectedCount="selected.size"
-            :currentPage="currentPage"
-            :totalPages="totalPages"
-            :totalItems="allChildren.length"
-            @select-all="selectAll"
-            @select-current-page="selectCurrentPage"
-            @remove-all="removeAll"
-            @select-one-week="selectOneWeek"
-            @select-one-month="selectOneMonth"
-            @select-one-year="selectOneYear"
-        />
+        <!-- footer bar aligned with filter items ---------------------------- -->
+        <div class="flex items-center gap-2">
+            <!-- spacer for pagination buttons to align footer with filter items -->
+            <div class="flex gap-2">
+                <!-- invisible spacers matching pagination button widths -->
+                <div class="px-2 opacity-0 pointer-events-none select-none">
+                    ‹‹
+                </div>
+                <div class="px-2 opacity-0 pointer-events-none select-none">
+                    ‹
+                </div>
+            </div>
+            <div class="flex-1">
+                <MaFilterQuickActions
+                    :selectedCount="selected.size"
+                    :currentPage="currentPage"
+                    :totalPages="totalPages"
+                    :totalItems="allChildren.length"
+                    :isAllSelected="isAllSelected"
+                    :isAllDeselected="isAllDeselected"
+                    :isCurrentPageAllSelected="isCurrentPageAllSelected"
+                    :isCurrentPageAllDeselected="isCurrentPageAllDeselected"
+                    @select-all="selectAll"
+                    @select-current-page="selectCurrentPage"
+                    @remove-all="removeAll"
+                    @remove-current-page="removeCurrentPage"
+                    @select-one-week="selectOneWeek"
+                    @select-one-month="selectOneMonth"
+                    @select-one-year="selectOneYear"
+                />
+            </div>
+        </div>
     </div>
 </template>

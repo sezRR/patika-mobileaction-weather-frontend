@@ -18,12 +18,29 @@ const props = defineProps({
         type: Number,
         default: 0,
     },
+    isAllSelected: {
+        type: Boolean,
+        default: false,
+    },
+    isAllDeselected: {
+        type: Boolean,
+        default: true,
+    },
+    isCurrentPageAllSelected: {
+        type: Boolean,
+        default: false,
+    },
+    isCurrentPageAllDeselected: {
+        type: Boolean,
+        default: true,
+    },
 });
 
 defineEmits([
     "select-all",
     "select-current-page",
     "remove-all",
+    "remove-current-page",
     "select-one-week",
     "select-one-month",
     "select-one-year",
@@ -38,22 +55,41 @@ const isYearAvailable = computed(() => props.totalItems >= 365);
 <template>
     <div class="flex gap-2 justify-between items-center">
         <div class="flex gap-2 text-xs text-stone-500">
-            <button class="hover:underline" @click="$emit('select-all')">
+            <button
+                class="hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+                :disabled="isAllSelected"
+                @click="$emit('select-all')"
+            >
                 Select all
             </button>
             <template v-if="totalPages > 1">
                 <span>·</span>
                 <button
-                    class="hover:underline"
+                    class="hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+                    :disabled="isCurrentPageAllSelected"
                     @click="$emit('select-current-page')"
                 >
                     Select current page
                 </button>
             </template>
             <span>·</span>
-            <button class="hover:underline" @click="$emit('remove-all')">
+            <button
+                class="hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+                :disabled="isAllDeselected"
+                @click="$emit('remove-all')"
+            >
                 Remove all
             </button>
+            <template v-if="totalPages > 1">
+                <span>·</span>
+                <button
+                    class="hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+                    :disabled="isCurrentPageAllDeselected"
+                    @click="$emit('remove-current-page')"
+                >
+                    Remove current page
+                </button>
+            </template>
 
             <!-- More actions section -->
             <template
@@ -89,8 +125,8 @@ const isYearAvailable = computed(() => props.totalItems >= 365);
             </span>
         </div>
 
-        <span v-if="totalPages > 1" class="text-stone-400 text-xs select-none">
-            {{ currentPage + 1 }} / {{ totalPages }}
+        <span class="text-stone-400 text-xs select-none">
+            {{ currentPage + 1 }} / {{ Math.max(1, totalPages) }}
         </span>
     </div>
 </template>

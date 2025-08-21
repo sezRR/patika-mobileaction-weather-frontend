@@ -31,24 +31,22 @@ const daysInRange = computed(() => {
 
 <template>
     <div
-        class="min-h-screen flex flex-col items-center justify-center gap-4 p-6"
+        class="min-h-screen flex flex-col items-center justify-center gap-4 px-6"
     >
-        <div class="flex flex-col p-8 items-center gap-4 h-96">
-            <MaBackendStatusBadge :isOnline="true" />
-
-            <!-- date picker -->
-            <div class="flex flex-col gap-1">
-                <span class="text-xs text-stone-400"
-                    >Select your date range</span
-                >
-                <MaDatePicker2
-                    v-model="dateRange"
-                    :range="true"
-                    :multiCalendars="true"
-                    placeholder="Start Date – End Date"
-                />
+        <div
+            class="flex flex-col px-8 justify-between items-center gap-4 h-screen py-4"
+        >
+            <div class="flex flex-col gap-2">
+                <MaBackendStatusBadge :isOnline="true" />
+                <div class="flex flex-col gap-1">
+                    <MaDatePicker2
+                        v-model="dateRange"
+                        :range="true"
+                        :multiCalendars="true"
+                        placeholder="Start Date – End Date"
+                    />
+                </div>
             </div>
-
             <MaFilterContainer>
                 <MaFilter v-for="day in daysInRange" :key="day" :date="day">
                     {{ day }}
