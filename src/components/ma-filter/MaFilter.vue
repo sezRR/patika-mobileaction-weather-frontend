@@ -15,11 +15,15 @@ const isActive = computed({
 </script>
 
 <template>
-    <MaTabButton2
-        :isActive="isActive"
-        type="rounded-dark"
-        @click="isActive = !isActive"
+    <div
+        class="[&>.ma-tab-button]:max-w-28 [&>.ma-tab-button]:w-28 [&>.ma-tab-button>.ma-ellipsis]:flex-1"
     >
-        <slot />
-    </MaTabButton2>
+        <MaTabButton2
+            :isActive="isActive"
+            type="rounded-dark"
+            @click="isActive = !isActive"
+        >
+            <slot />
+        </MaTabButton2>
+    </div>
 </template>

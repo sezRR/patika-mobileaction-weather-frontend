@@ -180,7 +180,7 @@ const placeholderCount = computed(
 <template>
     <div class="flex flex-col gap-2">
         <!-- header aligned with filter items --------------------------------- -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 w-96 min-w-96">
             <!-- spacer for pagination buttons to align header with filter items -->
             <div class="flex gap-2">
                 <!-- invisible spacers matching pagination button widths -->
@@ -239,8 +239,7 @@ const placeholderCount = computed(
             <div
                 v-for="n in placeholderCount"
                 :key="'ph' + n"
-                class="opacity-0 pointer-events-none select-none"
-                style="height: 2.5rem; width: 4rem"
+                class="opacity-0 pointer-events-none select-none w-28"
             ></div>
 
             <!-- › (next) - always visible -->
