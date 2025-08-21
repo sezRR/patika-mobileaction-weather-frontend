@@ -5,6 +5,7 @@
       "name": "patika-weather-project-frontend",
       "dependencies": {
         "@mobileaction/action-kit": "^1.54.3",
+        "dayjs": "^1.11.13",
         "vue": "^3.5.18",
       },
       "devDependencies": {
