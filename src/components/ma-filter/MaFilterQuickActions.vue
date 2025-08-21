@@ -22,6 +22,7 @@ const props = defineProps({
 
 defineEmits([
     "select-all",
+    "select-current-page",
     "remove-all",
     "select-one-week",
     "select-one-month",
@@ -40,6 +41,15 @@ const isYearAvailable = computed(() => props.totalItems >= 365);
             <button class="hover:underline" @click="$emit('select-all')">
                 Select all
             </button>
+            <template v-if="totalPages > 1">
+                <span>·</span>
+                <button
+                    class="hover:underline"
+                    @click="$emit('select-current-page')"
+                >
+                    Select current page
+                </button>
+            </template>
             <span>·</span>
             <button class="hover:underline" @click="$emit('remove-all')">
                 Remove all
@@ -50,27 +60,27 @@ const isYearAvailable = computed(() => props.totalItems >= 365);
                 v-if="isWeekAvailable || isMonthAvailable || isYearAvailable"
             >
                 <span>·</span>
-                <span class="text-stone-400">More actions:</span>
+                <span class="text-stone-400">From current position:</span>
                 <button
                     v-if="isWeekAvailable"
                     class="hover:underline"
                     @click="$emit('select-one-week')"
                 >
-                    Select 1 week
+                    +1 week
                 </button>
                 <button
                     v-if="isMonthAvailable"
                     class="hover:underline"
                     @click="$emit('select-one-month')"
                 >
-                    Select 1 month
+                    +1 month
                 </button>
                 <button
                     v-if="isYearAvailable"
                     class="hover:underline"
                     @click="$emit('select-one-year')"
                 >
-                    Select 1 year
+                    +1 year
                 </button>
             </template>
 

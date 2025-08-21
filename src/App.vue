@@ -21,7 +21,7 @@ const daysInRange = computed(() => {
     const end = dayjs(endStr);
 
     const days = [];
-    for (let d = start; !d.isAfter(end); d = d.add(1, "day")) {
+    for (let d = end; !d.isBefore(start); d = d.subtract(1, "day")) {
         days.push(d.format("YYYY-MM-DD"));
     }
 

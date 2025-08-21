@@ -62,30 +62,46 @@ function toggleSingle(idx, event) {
 /* ---------- bulk toolbar ----------------------------------------------- */
 const selectAll = () =>
     (selected.value = new Set(allChildren.value.map((_, i) => i)));
+
+const selectCurrentPage = () => {
+    const currentPageStart = currentPage.value * ITEMS_PER_PAGE;
+    const currentPageIndices = paginatedChildren.value.map(
+        (_, localIdx) => currentPageStart + localIdx
+    );
+    // Merge with existing selections instead of replacing
+    currentPageIndices.forEach((idx) => selected.value.add(idx));
+};
+
 const removeAll = () => selected.value.clear();
 
 const selectOneWeek = () => {
+    const currentPageStart = currentPage.value * ITEMS_PER_PAGE;
     const weekIndices = Array.from(
-        { length: Math.min(7, allChildren.value.length) },
-        (_, i) => i
+        { length: Math.min(7, allChildren.value.length - currentPageStart) },
+        (_, i) => currentPageStart + i
     );
-    selected.value = new Set(weekIndices);
+    // Merge with existing selections instead of replacing
+    weekIndices.forEach((idx) => selected.value.add(idx));
 };
 
 const selectOneMonth = () => {
+    const currentPageStart = currentPage.value * ITEMS_PER_PAGE;
     const monthIndices = Array.from(
-        { length: Math.min(30, allChildren.value.length) },
-        (_, i) => i
+        { length: Math.min(30, allChildren.value.length - currentPageStart) },
+        (_, i) => currentPageStart + i
     );
-    selected.value = new Set(monthIndices);
+    // Merge with existing selections instead of replacing
+    monthIndices.forEach((idx) => selected.value.add(idx));
 };
 
 const selectOneYear = () => {
+    const currentPageStart = currentPage.value * ITEMS_PER_PAGE;
     const yearIndices = Array.from(
-        { length: Math.min(365, allChildren.value.length) },
-        (_, i) => i
+        { length: Math.min(365, allChildren.value.length - currentPageStart) },
+        (_, i) => currentPageStart + i
     );
-    selected.value = new Set(yearIndices);
+    // Merge with existing selections instead of replacing
+    yearIndices.forEach((idx) => selected.value.add(idx));
 };
 
 /* ---------- placeholders keep layout fixed ----------------------------- */
@@ -155,6 +171,7 @@ const placeholderCount = computed(
             :totalPages="totalPages"
             :totalItems="allChildren.length"
             @select-all="selectAll"
+            @select-current-page="selectCurrentPage"
             @remove-all="removeAll"
             @select-one-week="selectOneWeek"
             @select-one-month="selectOneMonth"
