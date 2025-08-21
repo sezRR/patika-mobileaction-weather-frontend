@@ -23,7 +23,7 @@ const badgeText = computed(() =>
             :variant="badgeVariant"
             type="secondary"
             size="medium"
-            class="self-start"
+            class="flex justify-center items-center"
         >
             <MaBadge shape="dot" :variant="badgeVariant" />
             {{ badgeText }}

@@ -1,16 +1,22 @@
 <script setup>
-import { MaDatePicker2 } from "@mobileaction/action-kit";
+import { MaCountryRadio, MaDatePicker2 } from "@mobileaction/action-kit";
 import dayjs from "dayjs";
 import { ref, computed } from "vue";
 
 import MaBackendStatusBadge from "./components/MaBackendStatusBadge.vue";
 import MaFilter from "./components/ma-filter/MaFilter.vue";
 import MaFilterContainer from "./components/ma-filter/MaFilterContainer.vue";
+import MaLogo from "./components/MaLogo.vue";
+import MobileActionLogoSvg from "@/assets/mobileaction-logo.svg";
+import PatikaLogoSvg from "@/assets/patika-logo.svg";
+import MaLabel from "./components/MaLabel.vue";
 
 const dateRange = ref([
     dayjs().subtract(1, "week").format("YYYY-MM-DD"),
     dayjs().subtract(1, "day").format("YYYY-MM-DD"),
 ]);
+
+const selectedCountry = ref("gb");
 
 /* --- build an array of all dates between start & end (inclusive) --- */
 const daysInRange = computed(() => {
@@ -30,6 +36,17 @@ const daysInRange = computed(() => {
 </script>
 
 <template>
+    <MaLogo
+        placement="top-left"
+        :src="MobileActionLogoSvg"
+        alt="Mobile Action Logo"
+    />
+    <MaLogo
+        placement="top-right"
+        :src="PatikaLogoSvg"
+        alt="Patika Logo"
+        class="w-32"
+    />
     <div
         class="min-h-screen flex flex-col items-center justify-center gap-4 px-6"
     >
@@ -46,7 +63,18 @@ const daysInRange = computed(() => {
                         placeholder="Start Date – End Date"
                     />
                 </div>
+                <div class="flex gap-2 justify-center items-center">
+                    <MaLabel>Language:</MaLabel>
+                    <MaCountryRadio
+                        name="country"
+                        :country="country"
+                        :key="country"
+                        v-model:value="selectedCountry"
+                        v-for="country in ['tr', 'gb', 'fr']"
+                    />
+                </div>
             </div>
+            <div>Hello, World!</div>
             <MaFilterContainer>
                 <MaFilter v-for="day in daysInRange" :key="day" :date="day">
                     {{ day }}
