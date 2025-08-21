@@ -1,5 +1,9 @@
 <script setup>
-import { MaCountryRadio, MaDatePicker2 } from "@mobileaction/action-kit";
+import {
+    MaDatePicker2,
+    MaRadioGroup,
+    MaCountryRadio,
+} from "@mobileaction/action-kit";
 import dayjs from "dayjs";
 import { ref, computed } from "vue";
 
@@ -9,7 +13,12 @@ import MaFilterContainer from "./components/ma-filter/MaFilterContainer.vue";
 import MaLogo from "./components/MaLogo.vue";
 import MobileActionLogoSvg from "@/assets/mobileaction-logo.svg";
 import PatikaLogoSvg from "@/assets/patika-logo.svg";
-import MaLabel from "./components/MaLabel.vue";
+import MaCustomCityRadio from "./components/MaCustomCityRadio.vue";
+import Barcelona from "@/assets/maps/barcelona.webp";
+import London from "@/assets/maps/london.webp";
+import Ankara from "@/assets/maps/ankara.webp";
+import Mumbai from "@/assets/maps/mumbai.webp";
+import Tokyo from "@/assets/maps/tokyo.webp";
 
 const dateRange = ref([
     dayjs().subtract(1, "week").format("YYYY-MM-DD"),
@@ -17,6 +26,7 @@ const dateRange = ref([
 ]);
 
 const selectedCountry = ref("gb");
+const selectedCity = ref("ankara");
 
 /* --- build an array of all dates between start & end (inclusive) --- */
 const daysInRange = computed(() => {
@@ -36,50 +46,97 @@ const daysInRange = computed(() => {
 </script>
 
 <template>
-    <MaLogo
-        placement="top-left"
-        :src="MobileActionLogoSvg"
-        alt="Mobile Action Logo"
-    />
-    <MaLogo
-        placement="top-right"
-        :src="PatikaLogoSvg"
-        alt="Patika Logo"
-        class="w-32"
-    />
     <div
         class="min-h-screen flex flex-col items-center justify-center gap-4 px-6"
     >
         <div
             class="flex flex-col px-8 justify-between items-center gap-4 h-screen py-4"
         >
-            <div class="flex flex-col gap-2">
-                <MaBackendStatusBadge :isOnline="true" />
-                <div class="flex flex-col gap-1">
-                    <MaDatePicker2
-                        v-model="dateRange"
-                        :range="true"
-                        :multiCalendars="true"
-                        placeholder="Start Date – End Date"
+            <div className="grid grid-cols-5 grid-rows-1 gap-4">
+                <div className="col-span-2 relative">
+                    <MaLogo
+                        placement="top-right"
+                        :src="MobileActionLogoSvg"
+                        alt="Mobile Action Logo"
+                        class="w-44"
                     />
                 </div>
-                <div class="flex gap-2 justify-center items-center">
-                    <MaLabel>Language:</MaLabel>
-                    <MaCountryRadio
-                        name="country"
-                        :country="country"
-                        :key="country"
-                        v-model:value="selectedCountry"
-                        v-for="country in ['tr', 'gb', 'fr']"
+                <div className="flex flex-col gap-2 col-start-3">
+                    <MaBackendStatusBadge :isOnline="true" />
+                    <div class="flex flex-col gap-1">
+                        <MaDatePicker2
+                            v-model="dateRange"
+                            :range="true"
+                            :multiCalendars="true"
+                            placeholder="Start Date – End Date"
+                        />
+                    </div>
+                    <div class="flex gap-2 justify-center items-center flex-1">
+                        <MaCountryRadio
+                            name="country"
+                            :country="country"
+                            :key="country"
+                            v-model:value="selectedCountry"
+                            v-for="country in ['tr', 'gb', 'fr']"
+                        />
+                    </div>
+                </div>
+                <div className="col-span-2 col-start-4 wrap relative">
+                    <MaLogo
+                        placement="top-left"
+                        :src="PatikaLogoSvg"
+                        alt="Patika Logo"
+                        class="w-32"
                     />
                 </div>
             </div>
-            <div>Hello, World!</div>
+            <!-- https://mobileaction.github.io/action-kit/?path=/docs/advanced-machart--docs -->
+            <div class="flex flex-col gap-2 justify-between flex-1">
+                <span>a</span>
+            </div>
             <MaFilterContainer>
                 <MaFilter v-for="day in daysInRange" :key="day" :date="day">
                     {{ day }}
                 </MaFilter>
             </MaFilterContainer>
+            <MaRadioGroup v-model:value="selectedCity">
+                <MaCustomCityRadio
+                    city="Barcelona"
+                    country="Spain"
+                    :map="Barcelona"
+                    alt="City Map of Barcelona"
+                    value="barcelona"
+                />
+                <MaCustomCityRadio
+                    city="London"
+                    country="United Kingdom"
+                    :map="London"
+                    alt="City Map of London"
+                    value="london"
+                />
+                <MaCustomCityRadio
+                    city="Ankara"
+                    country="Turkey"
+                    :map="Ankara"
+                    alt="City Map of Ankara"
+                    selected="true"
+                    value="ankara"
+                />
+                <MaCustomCityRadio
+                    city="Mumbai"
+                    country="India"
+                    :map="Mumbai"
+                    alt="City Map of Mumbai"
+                    value="mumbai"
+                />
+                <MaCustomCityRadio
+                    city="Tokyo"
+                    country="Japan"
+                    :map="Tokyo"
+                    alt="City Map of Tokyo"
+                    value="tokyo"
+                />
+            </MaRadioGroup>
         </div>
     </div>
 </template>
