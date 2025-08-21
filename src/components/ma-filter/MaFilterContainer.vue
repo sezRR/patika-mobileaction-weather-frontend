@@ -1,6 +1,7 @@
 <script setup>
 import { useSlots, computed, ref, onMounted, onBeforeUnmount } from "vue";
 import MaLabel from "../MaLabel.vue";
+import MaFilterQuickActions from "./MaFilterQuickActions.vue";
 
 const slots = useSlots();
 const ITEMS_PER_PAGE = 7;
@@ -63,6 +64,30 @@ const selectAll = () =>
     (selected.value = new Set(allChildren.value.map((_, i) => i)));
 const removeAll = () => selected.value.clear();
 
+const selectOneWeek = () => {
+    const weekIndices = Array.from(
+        { length: Math.min(7, allChildren.value.length) },
+        (_, i) => i
+    );
+    selected.value = new Set(weekIndices);
+};
+
+const selectOneMonth = () => {
+    const monthIndices = Array.from(
+        { length: Math.min(30, allChildren.value.length) },
+        (_, i) => i
+    );
+    selected.value = new Set(monthIndices);
+};
+
+const selectOneYear = () => {
+    const yearIndices = Array.from(
+        { length: Math.min(365, allChildren.value.length) },
+        (_, i) => i
+    );
+    selected.value = new Set(yearIndices);
+};
+
 /* ---------- placeholders keep layout fixed ----------------------------- */
 const placeholderCount = computed(
     () => ITEMS_PER_PAGE - paginatedChildren.value.length
@@ -124,26 +149,16 @@ const placeholderCount = computed(
         </div>
 
         <!-- footer bar ------------------------------------------------------- -->
-        <div class="flex gap-2 justify-between items-center">
-            <div class="flex gap-2 text-xs text-stone-500">
-                <button class="hover:underline" @click="selectAll">
-                    Select all
-                </button>
-                <span>·</span>
-                <button class="hover:underline" @click="removeAll">
-                    Remove all
-                </button>
-                <span v-if="selected.size" class="ml-1 italic">
-                    {{ selected.size }} selected
-                </span>
-            </div>
-
-            <span
-                v-if="totalPages > 1"
-                class="text-stone-400 text-xs select-none"
-            >
-                {{ currentPage + 1 }} / {{ totalPages }}
-            </span>
-        </div>
+        <MaFilterQuickActions
+            :selectedCount="selected.size"
+            :currentPage="currentPage"
+            :totalPages="totalPages"
+            :totalItems="allChildren.length"
+            @select-all="selectAll"
+            @remove-all="removeAll"
+            @select-one-week="selectOneWeek"
+            @select-one-month="selectOneMonth"
+            @select-one-year="selectOneYear"
+        />
     </div>
 </template>
