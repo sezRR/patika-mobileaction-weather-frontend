@@ -4,19 +4,24 @@ import tr from "./locales/tr.json";
 import fr from "./locales/fr.json";
 
 const getLocale = () => {
+    const cookieName = "PATIKA_MA_WEATHER_LOCALE";
     const cookieValue = document.cookie
         .split("; ")
-        .find((row) => row.startsWith("PATIKA_MA_WEATHER_LOCALE="))
+        .find((row) => row.startsWith(`${cookieName}=`))
         ?.split("=")[1];
 
-    if (cookieValue === "gb") return "en";
-    return cookieValue || navigator.language.split("-")[0] || "en";
+    if (cookieValue) {
+        return cookieValue;
+    }
+
+    document.cookie = `${cookieName}=gb;path=/;max-age=31536000`;
+    return "gb";
 };
 
 const i18n = createI18n({
     legacy: false,
     locale: getLocale(),
-    fallbackLocale: "en",
+    fallbackLocale: "gb",
     messages: {
         en,
         tr,

@@ -21,12 +21,12 @@ import Ankara from "@/assets/maps/ankara.webp";
 import Mumbai from "@/assets/maps/mumbai.webp";
 import Tokyo from "@/assets/maps/tokyo.webp";
 import MaCustomChart from "./components/chart/MaCustomChart.vue";
-import MaCustomChart2 from "./components/chart/MaCustomChart2.vue";
 
 const { t, locale } = useI18n();
 
 watch(locale, (newLocale) => {
-    document.cookie = `PATIKA_MA_WEATHER_LOCALE=${newLocale};path=/;max-age=31536000`;
+    let cookieValue = newLocale;
+    document.cookie = `PATIKA_MA_WEATHER_LOCALE=${cookieValue};path=/;max-age=31536000`;
 });
 
 const dateRange = ref([
@@ -34,7 +34,6 @@ const dateRange = ref([
     dayjs().subtract(1, "day").format("YYYY-MM-DD"),
 ]);
 
-const selectedCountry = ref("gb");
 const selectedCity = ref("ankara");
 
 /* --- build an array of all dates between start & end (inclusive) --- */
@@ -113,10 +112,8 @@ const handleSelectionChange = (newSelectedDates) => {
                     />
                 </div>
             </div>
-            <!-- https://mobileaction.github.io/action-kit/?path=/docs/advanced-machart--docs -->
             <div class="flex flex-col gap-2 justify-center items-center flex-1">
                 <MaCustomChart :dates="filteredDates" />
-                <!-- <MaCustomChart2 /> -->
             </div>
             <MaFilterContainer @selection-change="handleSelectionChange">
                 <MaFilter v-for="day in daysInRange" :key="day" :date="day">
