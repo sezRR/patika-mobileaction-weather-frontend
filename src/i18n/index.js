@@ -27,6 +27,29 @@ const i18n = createI18n({
         tr,
         fr,
     },
+    datetimeFormats: {
+        gb: {
+            short: {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+            },
+        },
+        tr: {
+            short: {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+            },
+        },
+        fr: {
+            short: {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+            },
+        },
+    },
 });
 
 export default i18n;

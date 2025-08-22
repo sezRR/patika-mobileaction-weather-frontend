@@ -5,6 +5,9 @@ import {
     MaCountryRadio,
 } from "@mobileaction/action-kit";
 import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import "dayjs/locale/tr";
+import "dayjs/locale/fr";
 import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -22,9 +25,12 @@ import Mumbai from "@/assets/maps/mumbai.webp";
 import Tokyo from "@/assets/maps/tokyo.webp";
 import MaCustomChart from "./components/chart/MaCustomChart.vue";
 
-const { t, locale } = useI18n();
+const { t, locale, d } = useI18n();
+
+dayjs.extend(localizedFormat);
 
 watch(locale, (newLocale) => {
+    dayjs.locale(newLocale);
     let cookieValue = newLocale;
     document.cookie = `PATIKA_MA_WEATHER_LOCALE=${cookieValue};path=/;max-age=31536000`;
 });
@@ -90,6 +96,9 @@ const handleSelectionChange = (newSelectedDates) => {
                             v-model="dateRange"
                             :range="true"
                             :multiCalendars="true"
+                            :format="
+                                locale === 'tr' ? 'D MMMM YYYY' : 'MMMM D, YYYY'
+                            "
                             placeholder="Start Date – End Date"
                         />
                     </div>
@@ -117,7 +126,7 @@ const handleSelectionChange = (newSelectedDates) => {
             </div>
             <MaFilterContainer @selection-change="handleSelectionChange">
                 <MaFilter v-for="day in daysInRange" :key="day" :date="day">
-                    {{ day }}
+                    {{ d(day, "short") }}
                 </MaFilter>
             </MaFilterContainer>
             <MaRadioGroup v-model:value="selectedCity">

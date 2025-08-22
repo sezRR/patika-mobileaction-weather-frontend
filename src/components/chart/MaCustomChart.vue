@@ -3,7 +3,7 @@ import { MaChart, MaIcon } from "@mobileaction/action-kit";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
-const { t } = useI18n();
+const { t, d } = useI18n();
 
 const props = defineProps({
     dates: {
@@ -11,6 +11,10 @@ const props = defineProps({
         default: () => [],
     },
 });
+
+const formattedDates = computed(() =>
+    props.dates.map((date) => d(date, "short"))
+);
 
 // Generate sample data based on the number of dates
 const generateSampleData = (length) => {
@@ -60,7 +64,7 @@ const options = computed(() => {
     return {
         xAxis: {
             categories: props.dates.length
-                ? props.dates
+                ? formattedDates.value
                 : Array.from({ length: dataLength }, (_, i) => `Day ${i + 1}`),
             title: {
                 text: t("date"),
