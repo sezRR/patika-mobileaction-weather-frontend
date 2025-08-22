@@ -19,6 +19,8 @@ import London from "@/assets/maps/london.webp";
 import Ankara from "@/assets/maps/ankara.webp";
 import Mumbai from "@/assets/maps/mumbai.webp";
 import Tokyo from "@/assets/maps/tokyo.webp";
+import MaCustomChart from "./components/chart/MaCustomChart.vue";
+import MaCustomChart2 from "./components/chart/MaCustomChart2.vue";
 
 const dateRange = ref([
     dayjs().subtract(1, "week").format("YYYY-MM-DD"),
@@ -91,8 +93,9 @@ const daysInRange = computed(() => {
                 </div>
             </div>
             <!-- https://mobileaction.github.io/action-kit/?path=/docs/advanced-machart--docs -->
-            <div class="flex flex-col gap-2 justify-between flex-1">
-                <span>a</span>
+            <div class="flex flex-col gap-2 justify-center items-center flex-1">
+                <MaCustomChart />
+                <!-- <MaCustomChart2 /> -->
             </div>
             <MaFilterContainer>
                 <MaFilter v-for="day in daysInRange" :key="day" :date="day">
