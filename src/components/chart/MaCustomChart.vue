@@ -1,5 +1,5 @@
 <script setup>
-import { MaChart } from "@mobileaction/action-kit";
+import { MaChart, MaIcon } from "@mobileaction/action-kit";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -160,5 +160,17 @@ const options = computed(() => {
 </script>
 
 <template>
-    <MaChart class="w-[90vw]" :options="options" />
+    <div
+        v-if="!props.dates || props.dates.length === 0"
+        class="flex flex-col items-center justify-center w-full h-full rounded-lg min-h-96 px-16"
+    >
+        <MaIcon size="xl" name="404" />
+        <p class="text-lg font-semibold text-gray-600">
+            {{ t("no_data_to_display") }}
+        </p>
+        <p class="text-gray-500">
+            {{ t("no_data_to_display_description") }}
+        </p>
+    </div>
+    <MaChart v-else class="w-[90vw]" :options="options" />
 </template>

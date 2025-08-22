@@ -33,5 +33,7 @@
     "one_week": "1h",
     "one_month": "1a",
     "one_year": "1y",
-    "selected": "seçili"
+    "selected": "seçili",
+    "no_data_to_display": "Görüntülenecek veri yok",
+    "no_data_to_display_description": "Grafiği görmek için filtreden bir tarih seçin"
 }

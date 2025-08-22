@@ -33,5 +33,7 @@
     "one_week": "1w",
     "one_month": "1m",
     "one_year": "1y",
-    "selected": "selected"
+    "selected": "selected",
+    "no_data_to_display": "No data to display",
+    "no_data_to_display_description": "Select a date from the filter to see the chart"
 }
