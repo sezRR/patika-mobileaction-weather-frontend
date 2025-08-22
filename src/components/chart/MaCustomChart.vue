@@ -90,7 +90,8 @@ const options = computed(() => {
         tooltip: {
             shared: true,
             formatter: function () {
-                const date = this.x;
+                const date = this.category;
+
                 const levels = ["a", "b", "c", "d", "e"];
                 let tooltip = `<b>${date}</b><br/>`;
 
@@ -112,7 +113,7 @@ const options = computed(() => {
                 }
 
                 this.points.forEach((point) => {
-                    if (point.series.name !== "Overall Air Quality") {
+                    if (point.series.name !== t("overall_air_quality")) {
                         const level = levels[point.y] || point.y;
                         tooltip += `<span style="color:${point.color}">●</span> ${point.series.name}: <b>${level}</b><br/>`;
                     }
