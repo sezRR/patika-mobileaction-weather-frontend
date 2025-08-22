@@ -94,7 +94,7 @@ const daysInRange = computed(() => {
             </div>
             <!-- https://mobileaction.github.io/action-kit/?path=/docs/advanced-machart--docs -->
             <div class="flex flex-col gap-2 justify-center items-center flex-1">
-                <MaCustomChart />
+                <MaCustomChart :dates="daysInRange" />
                 <!-- <MaCustomChart2 /> -->
             </div>
             <MaFilterContainer>

@@ -1,47 +1,159 @@
 <script setup>
 import { MaChart } from "@mobileaction/action-kit";
+import { computed } from "vue";
 
-const options = {
-    plotOptions: {
-        column: {
-            stacking: "normal",
-        },
+const props = defineProps({
+    dates: {
+        type: Array,
+        default: () => [],
     },
-    tooltip: {
-        shared: true,
-    },
-    series: [
-        {
-            type: "column",
-            name: "O₃",
-            data: [
-                1, 2, 3, 2, 1, 2, 3, 2, 1, 2, 3, 2, 1, 2, 3, 2, 1, 2, 3, 2, 1,
-                2, 3, 2, 1, 2, 3, 2, 1, 2, 3,
-            ],
-            color: "var(--ma-chart-color-app-rating-3)",
-        },
-        {
-            type: "column",
-            name: "CO",
-            data: [
-                3, 4, 2, 1, 3, 3, 2, 4, 1, 3, 3, 2, 1, 4, 3, 2, 1, 3, 3, 2, 4,
-                1, 3, 3, 2, 1, 4, 3, 2, 1, 3,
-            ],
-            color: "var(--ma-chart-color-app-rating-2)",
-        },
-        {
-            type: "column",
-            name: "SO₂",
-            data: [
-                2, 3, 1, 0, 2, 4, 5, 1, 0, 2, 3, 1, 2, 2, 3, 1, 0, 2, 1, 4, 3,
-                2, 1, 0, 2, 3, 1, 2, 2, 1, 0,
-            ],
-            color: "var(--ma-chart-color-app-rating-1)",
-        },
-    ],
+});
+
+// Generate sample data based on the number of dates
+const generateSampleData = (length) => {
+    return Array.from({ length }, () => Math.floor(Math.random() * 5));
 };
+
+// Generate data for all pollutants and calculate overall air quality
+const generateChartData = (length) => {
+    const o3Data = generateSampleData(length);
+    const coData = generateSampleData(length);
+    const so2Data = generateSampleData(length);
+
+    // Calculate overall air quality level as the maximum of all pollutants
+    const overallAirQuality = o3Data.map((o3, index) => {
+        return Math.max(o3, coData[index], so2Data[index]);
+    });
+
+    return {
+        o3Data,
+        coData,
+        so2Data,
+        overallAirQuality,
+    };
+};
+
+const options = computed(() => {
+    const dataLength = props.dates.length || 31;
+    const chartData = generateChartData(dataLength);
+
+    // Color mapping for air quality levels
+    const airQualityColors = [
+        "#4CAF50",
+        "#FFEB3B",
+        "#FF9800",
+        "#F44336",
+        "#9C27B0",
+    ]; // a=green, b=yellow, c=orange, d=red, e=purple
+
+    // Create data points with individual colors for the overall air quality line
+    const overallAirQualityWithColors = chartData.overallAirQuality.map(
+        (value, index) => ({
+            y: value,
+            color: airQualityColors[value] || "#888888",
+        })
+    );
+
+    return {
+        xAxis: {
+            categories: props.dates.length
+                ? props.dates
+                : Array.from({ length: dataLength }, (_, i) => `Day ${i + 1}`),
+            title: {
+                text: "Date",
+            },
+        },
+        yAxis: {
+            categories: ["a", "b", "c", "d", "e"],
+            title: {
+                text: "Air Quality Level",
+            },
+            labels: {
+                formatter: function () {
+                    const levels = ["a", "b", "c", "d", "e"];
+                    return levels[this.value] || this.value;
+                },
+            },
+            max: 4, // Limit to 0-4 (a-e)
+            min: 0,
+        },
+        plotOptions: {
+            column: {
+                stacking: "normal",
+                pointPadding: 0.1,
+                borderWidth: 0,
+            },
+        },
+        tooltip: {
+            shared: true,
+            formatter: function () {
+                const date = this.x;
+                const levels = ["a", "b", "c", "d", "e"];
+                let tooltip = `<b>${date}</b><br/>`;
+
+                // Find the overall air quality level for this point
+                const pointIndex = this.points[0]?.point?.index;
+                if (
+                    pointIndex !== undefined &&
+                    chartData.overallAirQuality[pointIndex] !== undefined
+                ) {
+                    const overallLevel =
+                        levels[chartData.overallAirQuality[pointIndex]];
+                    const overallColor =
+                        airQualityColors[
+                            chartData.overallAirQuality[pointIndex]
+                        ];
+                    tooltip += `<span style="color:${overallColor}">●</span> <b>Overall Air Quality: ${overallLevel}</b><br/><br/>`;
+                }
+
+                this.points.forEach((point) => {
+                    if (point.series.name !== "Overall Air Quality") {
+                        const level = levels[point.y] || point.y;
+                        tooltip += `<span style="color:${point.color}">●</span> ${point.series.name}: <b>${level}</b><br/>`;
+                    }
+                });
+
+                return tooltip;
+            },
+        },
+        series: [
+            {
+                type: "column",
+                name: "O₃",
+                data: chartData.o3Data,
+                color: "var(--ma-chart-color-app-rating-3)",
+            },
+            {
+                type: "column",
+                name: "CO",
+                data: chartData.coData,
+                color: "var(--ma-chart-color-app-rating-2)",
+            },
+            {
+                type: "column",
+                name: "SO₂",
+                data: chartData.so2Data,
+                color: "var(--ma-chart-color-app-rating-1)",
+            },
+            {
+                type: "line",
+                name: "Overall Air Quality",
+                data: overallAirQualityWithColors,
+                marker: {
+                    enabled: true,
+                    radius: 6,
+                    lineWidth: 2,
+                    lineColor: "#ffffff",
+                },
+                lineWidth: 3,
+                color: "#666666", // Default line color
+                showInLegend: true,
+            },
+        ],
+    };
+});
 </script>
 
 <template>
-    <MaChart class="w-[64rem]" :options="options" />
+    <MaChart class="w-[90vw]" :options="options" />
 </template>
