@@ -59,7 +59,7 @@ onBeforeUnmount(() => document.removeEventListener("keydown", onKey));
 const selected = ref(new Set()); // stores global indices
 const lastClickedIdx = ref(null); // last clicked index
 
-// Auto-select all items when the range changes or on initial load
+// Auto-select up to 30 items when the range changes or on initial load
 watch(
     () => allChildren.value.length,
     (newLength) => {
@@ -67,8 +67,9 @@ watch(
             // Reset to page 0 when date range changes
             currentPage.value = 0;
             // Select all items in the new range
+            const selectionCount = Math.min(newLength, MAX_SELECTION_DAYS);
             selected.value = new Set(
-                Array.from({ length: newLength }, (_, i) => i)
+                Array.from({ length: selectionCount }, (_, i) => i)
             );
         }
     },
@@ -87,6 +88,8 @@ watch(
     { deep: true }
 );
 
+const MAX_SELECTION_DAYS = 30;
+
 function toggleSingle(idx, event) {
     /* decide action based on *previous* item’s current state */
     if (event.shiftKey && lastClickedIdx.value !== null) {
@@ -94,19 +97,34 @@ function toggleSingle(idx, event) {
         const baseIsSelected = selected.value.has(lastClickedIdx.value);
 
         for (let i = start; i <= end; ++i) {
-            baseIsSelected ? selected.value.add(i) : selected.value.delete(i);
+            if (baseIsSelected) {
+                if (selected.value.size < MAX_SELECTION_DAYS) {
+                    selected.value.add(i);
+                }
+            } else {
+                selected.value.delete(i);
+            }
         }
     } else {
-        selected.value.has(idx)
-            ? selected.value.delete(idx)
-            : selected.value.add(idx);
+        if (selected.value.has(idx)) {
+            selected.value.delete(idx);
+        } else if (selected.value.size < MAX_SELECTION_DAYS) {
+            selected.value.add(idx);
+        }
     }
     lastClickedIdx.value = idx;
 }
 
 /* ---------- bulk toolbar ----------------------------------------------- */
-const selectAll = () =>
-    (selected.value = new Set(allChildren.value.map((_, i) => i)));
+const selectAll = () => {
+    const newSelected = new Set();
+    const allIndices = allChildren.value.map((_, i) => i);
+    for (const index of allIndices) {
+        if (newSelected.size >= MAX_SELECTION_DAYS) break;
+        newSelected.add(index);
+    }
+    selected.value = newSelected;
+};
 
 const selectCurrentPage = () => {
     const currentPageStart = currentPage.value * ITEMS_PER_PAGE;
@@ -114,7 +132,11 @@ const selectCurrentPage = () => {
         (_, localIdx) => currentPageStart + localIdx
     );
     // Merge with existing selections instead of replacing
-    currentPageIndices.forEach((idx) => selected.value.add(idx));
+    currentPageIndices.forEach((idx) => {
+        if (selected.value.size < MAX_SELECTION_DAYS) {
+            selected.value.add(idx);
+        }
+    });
 };
 
 const removeAll = () => selected.value.clear();
@@ -162,7 +184,11 @@ const selectOneWeek = () => {
         (_, i) => currentPageStart + i
     );
     // Merge with existing selections instead of replacing
-    weekIndices.forEach((idx) => selected.value.add(idx));
+    weekIndices.forEach((idx) => {
+        if (selected.value.size < MAX_SELECTION_DAYS) {
+            selected.value.add(idx);
+        }
+    });
 };
 
 const selectOneMonth = () => {
@@ -172,17 +198,11 @@ const selectOneMonth = () => {
         (_, i) => currentPageStart + i
     );
     // Merge with existing selections instead of replacing
-    monthIndices.forEach((idx) => selected.value.add(idx));
-};
-
-const selectOneYear = () => {
-    const currentPageStart = currentPage.value * ITEMS_PER_PAGE;
-    const yearIndices = Array.from(
-        { length: Math.min(365, allChildren.value.length - currentPageStart) },
-        (_, i) => currentPageStart + i
-    );
-    // Merge with existing selections instead of replacing
-    yearIndices.forEach((idx) => selected.value.add(idx));
+    monthIndices.forEach((idx) => {
+        if (selected.value.size < MAX_SELECTION_DAYS) {
+            selected.value.add(idx);
+        }
+    });
 };
 
 /* ---------- placeholders keep layout fixed ----------------------------- */
@@ -305,7 +325,6 @@ const placeholderCount = computed(
                     @remove-current-page="removeCurrentPage"
                     @select-one-week="selectOneWeek"
                     @select-one-month="selectOneMonth"
-                    @select-one-year="selectOneYear"
                     @selection-change="$emit('selection-change', $event)"
                 />
             </div>

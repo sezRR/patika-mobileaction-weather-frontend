@@ -46,13 +46,11 @@ defineEmits([
     "remove-current-page",
     "select-one-week",
     "select-one-month",
-    "select-one-year",
 ]);
 
 // Check if week and month selections are available
 const isWeekAvailable = computed(() => props.totalItems >= 7);
 const isMonthAvailable = computed(() => props.totalItems >= 30);
-const isYearAvailable = computed(() => props.totalItems >= 365);
 </script>
 
 <template>
@@ -95,9 +93,7 @@ const isYearAvailable = computed(() => props.totalItems >= 365);
             </template>
 
             <!-- More actions section -->
-            <template
-                v-if="isWeekAvailable || isMonthAvailable || isYearAvailable"
-            >
+            <template v-if="isWeekAvailable || isMonthAvailable">
                 <span>·</span>
                 <span class="text-stone-400"
                     >{{ t("from_current_position") }}:</span
@@ -115,13 +111,6 @@ const isYearAvailable = computed(() => props.totalItems >= 365);
                     @click="$emit('select-one-month')"
                 >
                     {{ t("one_month") }}
-                </button>
-                <button
-                    v-if="isYearAvailable"
-                    class="hover:underline"
-                    @click="$emit('select-one-year')"
-                >
-                    {{ t("one_year") }}
                 </button>
             </template>
 

@@ -3,6 +3,7 @@ import {
     MaDatePicker2,
     MaRadioGroup,
     MaCountryRadio,
+    MaButton,
 } from "@mobileaction/action-kit";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
@@ -24,8 +25,11 @@ import Ankara from "@/assets/maps/ankara.webp";
 import Mumbai from "@/assets/maps/mumbai.webp";
 import Tokyo from "@/assets/maps/tokyo.webp";
 import MaCustomChart from "./components/chart/MaCustomChart.vue";
+import MaAlertContainer from "./components/MaAlertContainer.vue";
+import { useAlerts } from "@/composables/useAlerts";
 
 const { t, locale, d } = useI18n();
+const { addAlert } = useAlerts();
 
 dayjs.extend(localizedFormat);
 
@@ -34,6 +38,15 @@ watch(locale, (newLocale) => {
     let cookieValue = newLocale;
     document.cookie = `PATIKA_MA_WEATHER_LOCALE=${cookieValue};path=/;max-age=31536000`;
 });
+
+const triggerAlert = () => {
+    addAlert({
+        title: "New Alert!",
+        message: "This is a new alert.",
+        type: "success",
+        duration: 1000,
+    });
+};
 
 const dateRange = ref([
     dayjs().subtract(1, "week").format("YYYY-MM-DD"),
@@ -77,6 +90,7 @@ const handleSelectionChange = (newSelectedDates) => {
     <div
         class="min-h-screen flex flex-col items-center justify-center gap-4 px-6"
     >
+        <MaAlertContainer />
         <div
             class="flex flex-col px-8 justify-between items-center gap-4 h-screen py-4"
         >
@@ -124,6 +138,7 @@ const handleSelectionChange = (newSelectedDates) => {
                 </div>
             </div>
             <div class="flex flex-col gap-2 justify-center items-center flex-1">
+                <MaButton @click="triggerAlert">Trigger Alert</MaButton>
                 <MaCustomChart :dates="filteredDates" />
             </div>
             <MaFilterContainer @selection-change="handleSelectionChange">
