@@ -40,6 +40,15 @@ const generateChartData = (length) => {
     };
 };
 
+const airQualityLevels = computed(() => [
+    t("GOOD"),
+    t("SATISFACTORY"),
+    t("MODERATE"),
+    t("POOR"),
+    t("SEVERE"),
+    t("HAZARDOUS"),
+]);
+
 const options = computed(() => {
     const dataLength = props.dates.length || 31;
     const chartData = generateChartData(dataLength);
@@ -50,8 +59,9 @@ const options = computed(() => {
         "#FFEB3B",
         "#FF9800",
         "#F44336",
+        "#9C0D38",
         "#9C27B0",
-    ]; // a=green, b=yellow, c=orange, d=red, e=purple
+    ];
 
     // Create data points with individual colors for the overall air quality line
     const overallAirQualityWithColors = chartData.overallAirQuality.map(
@@ -71,14 +81,13 @@ const options = computed(() => {
             },
         },
         yAxis: {
-            categories: ["a", "b", "c", "d", "e"],
+            categories: airQualityLevels.value,
             title: {
                 text: t("air_quality_level"),
             },
             labels: {
                 formatter: function () {
-                    const levels = ["a", "b", "c", "d", "e"];
-                    return levels[this.value] || this.value;
+                    return airQualityLevels.value[this.value] || this.value;
                 },
             },
             max: 4, // Limit to 0-4 (a-e)
@@ -96,7 +105,6 @@ const options = computed(() => {
             formatter: function () {
                 const date = this.category;
 
-                const levels = ["a", "b", "c", "d", "e"];
                 let tooltip = `<b>${date}</b><br/>`;
 
                 // Find the overall air quality level for this point
@@ -106,7 +114,9 @@ const options = computed(() => {
                     chartData.overallAirQuality[pointIndex] !== undefined
                 ) {
                     const overallLevel =
-                        levels[chartData.overallAirQuality[pointIndex]];
+                        airQualityLevels.value[
+                            chartData.overallAirQuality[pointIndex]
+                        ];
                     const overallColor =
                         airQualityColors[
                             chartData.overallAirQuality[pointIndex]
@@ -118,7 +128,8 @@ const options = computed(() => {
 
                 this.points.forEach((point) => {
                     if (point.series.name !== t("overall_air_quality")) {
-                        const level = levels[point.y] || point.y;
+                        const level =
+                            airQualityLevels.value[point.y] || point.y;
                         tooltip += `<span style="color:${point.color}">●</span> ${point.series.name}: <b>${level}</b><br/>`;
                     }
                 });

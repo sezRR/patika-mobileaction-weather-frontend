@@ -38,5 +38,11 @@
     "no_data_to_display_description": "Select a date from the filter to see the chart",
     "start_date": "Start Date",
     "end_date": "End Date",
-    "max_30_days_selection": "You can select a maximum of 30 days."
+    "max_90_days_selection": "You can select a maximum of 90 days.",
+    "GOOD": "GOOD",
+    "SATISFACTORY": "SATISFACTORY",
+    "MODERATE": "MODERATE",
+    "POOR": "POOR",
+    "SEVERE": "SEVERE",
+    "HAZARDOUS": "HAZARDOUS"
 }

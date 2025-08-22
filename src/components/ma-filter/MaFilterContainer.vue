@@ -92,7 +92,7 @@ watch(
     { deep: true }
 );
 
-const MAX_SELECTION_DAYS = 30;
+const MAX_SELECTION_DAYS = 90;
 
 function toggleSingle(idx, event) {
     /* decide action based on *previous* item’s current state */
@@ -107,7 +107,7 @@ function toggleSingle(idx, event) {
                 } else {
                     addAlert({
                         type: "warning",
-                        message: t("max_30_days_selection"),
+                        message: t("max_90_days_selection"),
                     });
                     break;
                 }
@@ -123,7 +123,7 @@ function toggleSingle(idx, event) {
         } else {
             addAlert({
                 type: "warning",
-                message: t("max_30_days_selection"),
+                message: t("max_90_days_selection"),
             });
         }
     }
@@ -146,7 +146,7 @@ const selectAll = () => {
     if (limitReached) {
         addAlert({
             type: "warning",
-            message: t("max_30_days_selection"),
+            message: t("max_90_days_selection"),
         });
     }
 };
@@ -169,7 +169,7 @@ const selectCurrentPage = () => {
     if (limitReached) {
         addAlert({
             type: "warning",
-            message: t("max_30_days_selection"),
+            message: t("max_90_days_selection"),
         });
     }
 };
@@ -231,7 +231,7 @@ const selectOneWeek = () => {
     if (limitReached) {
         addAlert({
             type: "warning",
-            message: t("max_30_days_selection"),
+            message: t("max_90_days_selection"),
         });
     }
 };
@@ -255,7 +255,7 @@ const selectOneMonth = () => {
     if (limitReached) {
         addAlert({
             type: "warning",
-            message: t("max_30_days_selection"),
+            message: t("max_90_days_selection"),
         });
     }
 };

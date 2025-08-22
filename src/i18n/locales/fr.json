@@ -38,5 +38,11 @@
     "no_data_to_display_description": "Sélectionnez une date dans le filtre pour voir le graphique",
     "start_date": "Date de début",
     "end_date": "Date de fin",
-    "max_30_days_selection": "Vous pouvez sélectionner un maximum de 30 jours."
+    "max_90_days_selection": "Vous pouvez sélectionner un maximum de 90 jours.",
+    "GOOD": "BON",
+    "SATISFACTORY": "SATISFAISANT",
+    "MODERATE": "MODÉRÉ",
+    "POOR": "MAUVAIS",
+    "SEVERE": "SÉVÈRE",
+    "HAZARDOUS": "DANGEREUX"
 }

@@ -38,5 +38,11 @@
     "no_data_to_display_description": "Grafiği görmek için filtreden bir tarih seçin",
     "start_date": "Başlangıç Tarihi",
     "end_date": "Bitiş Tarihi",
-    "max_30_days_selection": "En fazla 30 gün seçebilirsiniz."
+    "max_90_days_selection": "En fazla 90 gün seçebilirsiniz.",
+    "GOOD": "İYİ",
+    "SATISFACTORY": "YETERLİ",
+    "MODERATE": "ORTA",
+    "POOR": "KÖTÜ",
+    "SEVERE": "ŞİDDETLİ",
+    "HAZARDOUS": "TEHLİKELİ"
 }

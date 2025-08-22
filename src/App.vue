@@ -137,15 +137,7 @@ const handleSelectionChange = (newSelectedDates) => {
                     />
                 </div>
             </div>
-            <div class="flex flex-col gap-2 justify-center items-center flex-1">
-                <!-- <MaButton @click="triggerAlert">Trigger Alert</MaButton> -->
-                <MaCustomChart :dates="filteredDates" />
-            </div>
-            <MaFilterContainer @selection-change="handleSelectionChange">
-                <MaFilter v-for="day in daysInRange" :key="day" :date="day">
-                    {{ d(day, "short") }}
-                </MaFilter>
-            </MaFilterContainer>
+
             <MaRadioGroup v-model:value="selectedCity">
                 <MaCustomCityRadio
                     :city="t('barcelona')"
@@ -184,6 +176,14 @@ const handleSelectionChange = (newSelectedDates) => {
                     value="tokyo"
                 />
             </MaRadioGroup>
+            <div class="flex flex-col gap-2 justify-center items-center flex-1">
+                <MaCustomChart :dates="filteredDates" />
+            </div>
+            <MaFilterContainer @selection-change="handleSelectionChange">
+                <MaFilter v-for="day in daysInRange" :key="day" :date="day">
+                    {{ d(day, "short") }}
+                </MaFilter>
+            </MaFilterContainer>
         </div>
     </div>
 </template>
