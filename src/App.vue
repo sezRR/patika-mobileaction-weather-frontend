@@ -5,7 +5,8 @@ import {
     MaCountryRadio,
 } from "@mobileaction/action-kit";
 import dayjs from "dayjs";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
+import { useI18n } from "vue-i18n";
 
 import MaBackendStatusBadge from "./components/MaBackendStatusBadge.vue";
 import MaFilter from "./components/ma-filter/MaFilter.vue";
@@ -21,6 +22,12 @@ import Mumbai from "@/assets/maps/mumbai.webp";
 import Tokyo from "@/assets/maps/tokyo.webp";
 import MaCustomChart from "./components/chart/MaCustomChart.vue";
 import MaCustomChart2 from "./components/chart/MaCustomChart2.vue";
+
+const { t, locale } = useI18n();
+
+watch(locale, (newLocale) => {
+    document.cookie = `PATIKA_MA_WEATHER_LOCALE=${newLocale};path=/;max-age=31536000`;
+});
 
 const dateRange = ref([
     dayjs().subtract(1, "week").format("YYYY-MM-DD"),
@@ -78,7 +85,7 @@ const daysInRange = computed(() => {
                             name="country"
                             :country="country"
                             :key="country"
-                            v-model:value="selectedCountry"
+                            v-model:value="locale"
                             v-for="country in ['tr', 'gb', 'fr']"
                         />
                     </div>
@@ -104,37 +111,37 @@ const daysInRange = computed(() => {
             </MaFilterContainer>
             <MaRadioGroup v-model:value="selectedCity">
                 <MaCustomCityRadio
-                    city="Barcelona"
-                    country="Spain"
+                    :city="t('barcelona')"
+                    :country="t('spain')"
                     :map="Barcelona"
                     alt="City Map of Barcelona"
                     value="barcelona"
                 />
                 <MaCustomCityRadio
-                    city="London"
-                    country="United Kingdom"
+                    :city="t('london')"
+                    :country="t('united_kingdom')"
                     :map="London"
                     alt="City Map of London"
                     value="london"
                 />
                 <MaCustomCityRadio
-                    city="Ankara"
-                    country="Turkey"
+                    :city="t('ankara')"
+                    :country="t('turkey')"
                     :map="Ankara"
                     alt="City Map of Ankara"
                     selected="true"
                     value="ankara"
                 />
                 <MaCustomCityRadio
-                    city="Mumbai"
-                    country="India"
+                    :city="t('mumbai')"
+                    :country="t('india')"
                     :map="Mumbai"
                     alt="City Map of Mumbai"
                     value="mumbai"
                 />
                 <MaCustomCityRadio
-                    city="Tokyo"
-                    country="Japan"
+                    :city="t('tokyo')"
+                    :country="t('japan')"
                     :map="Tokyo"
                     alt="City Map of Tokyo"
                     value="tokyo"

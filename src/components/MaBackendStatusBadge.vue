@@ -1,6 +1,9 @@
 <script setup>
 import { MaBadge } from "@mobileaction/action-kit";
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps({
     isOnline: {
@@ -12,7 +15,7 @@ const props = defineProps({
 const badgeVariant = computed(() => (props.isOnline ? "green" : "red"));
 
 const badgeText = computed(() =>
-    props.isOnline ? "Backend is Online" : "Backend is Offline"
+    props.isOnline ? t("backend_online") : t("backend_offline")
 );
 </script>
 

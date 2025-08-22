@@ -1,5 +1,8 @@
 <script setup>
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps({
     selectedCount: {
@@ -60,7 +63,7 @@ const isYearAvailable = computed(() => props.totalItems >= 365);
                 :disabled="isAllSelected"
                 @click="$emit('select-all')"
             >
-                Select all
+                {{ t("select_all") }}
             </button>
             <template v-if="totalPages > 1">
                 <span>·</span>
@@ -69,7 +72,7 @@ const isYearAvailable = computed(() => props.totalItems >= 365);
                     :disabled="isCurrentPageAllSelected"
                     @click="$emit('select-current-page')"
                 >
-                    Select current page
+                    {{ t("select_current_page") }}
                 </button>
             </template>
             <span>·</span>
@@ -78,7 +81,7 @@ const isYearAvailable = computed(() => props.totalItems >= 365);
                 :disabled="isAllDeselected"
                 @click="$emit('remove-all')"
             >
-                Remove all
+                {{ t("remove_all") }}
             </button>
             <template v-if="totalPages > 1">
                 <span>·</span>
@@ -87,7 +90,7 @@ const isYearAvailable = computed(() => props.totalItems >= 365);
                     :disabled="isCurrentPageAllDeselected"
                     @click="$emit('remove-current-page')"
                 >
-                    Remove current page
+                    {{ t("remove_current_page") }}
                 </button>
             </template>
 
@@ -96,32 +99,34 @@ const isYearAvailable = computed(() => props.totalItems >= 365);
                 v-if="isWeekAvailable || isMonthAvailable || isYearAvailable"
             >
                 <span>·</span>
-                <span class="text-stone-400">From current position:</span>
+                <span class="text-stone-400"
+                    >{{ t("from_current_position") }}:</span
+                >
                 <button
                     v-if="isWeekAvailable"
                     class="hover:underline"
                     @click="$emit('select-one-week')"
                 >
-                    +1 week
+                    {{ t("one_week") }}
                 </button>
                 <button
                     v-if="isMonthAvailable"
                     class="hover:underline"
                     @click="$emit('select-one-month')"
                 >
-                    +1 month
+                    {{ t("one_month") }}
                 </button>
                 <button
                     v-if="isYearAvailable"
                     class="hover:underline"
                     @click="$emit('select-one-year')"
                 >
-                    +1 year
+                    {{ t("one_year") }}
                 </button>
             </template>
 
             <span v-if="selectedCount" class="ml-1 italic">
-                {{ selectedCount }} selected
+                {{ selectedCount }} {{ t("selected") }}
             </span>
         </div>
 

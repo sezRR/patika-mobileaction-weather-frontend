@@ -1,6 +1,9 @@
 <script setup>
 import { MaChart } from "@mobileaction/action-kit";
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps({
     dates: {
@@ -60,13 +63,13 @@ const options = computed(() => {
                 ? props.dates
                 : Array.from({ length: dataLength }, (_, i) => `Day ${i + 1}`),
             title: {
-                text: "Date",
+                text: t("date"),
             },
         },
         yAxis: {
             categories: ["a", "b", "c", "d", "e"],
             title: {
-                text: "Air Quality Level",
+                text: t("air_quality_level"),
             },
             labels: {
                 formatter: function () {
@@ -103,7 +106,9 @@ const options = computed(() => {
                         airQualityColors[
                             chartData.overallAirQuality[pointIndex]
                         ];
-                    tooltip += `<span style="color:${overallColor}">●</span> <b>Overall Air Quality: ${overallLevel}</b><br/><br/>`;
+                    tooltip += `<span style="color:${overallColor}">●</span> <b>${t(
+                        "overall_air_quality"
+                    )}: ${overallLevel}</b><br/><br/>`;
                 }
 
                 this.points.forEach((point) => {
@@ -137,7 +142,7 @@ const options = computed(() => {
             },
             {
                 type: "line",
-                name: "Overall Air Quality",
+                name: t("overall_air_quality"),
                 data: overallAirQualityWithColors,
                 marker: {
                     enabled: true,
