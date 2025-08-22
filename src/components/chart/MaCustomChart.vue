@@ -10,26 +10,86 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    pollutionData: {
+        type: Array,
+        default: () => [],
+    },
+    loading: {
+        type: Boolean,
+        default: false,
+    },
+    error: {
+        type: Object,
+        default: null,
+    },
 });
+
+const airQualityMap = {
+    GOOD: 1,
+    SATISFACTORY: 2,
+    MODERATE: 3,
+    POOR: 4,
+    SEVERE: 5,
+    HAZARDOUS: 6,
+};
 
 const formattedDates = computed(() =>
     props.dates.map((date) => d(date, "short"))
 );
 
-// Generate sample data based on the number of dates
-const generateSampleData = (length) => {
-    return Array.from({ length }, () => Math.floor(Math.random() * 5));
-};
+const chartData = computed(() => {
+    const dataByDate = props.pollutionData.reduce((acc, item) => {
+        acc[item.date] = item.airQualityComponents;
+        return acc;
+    }, {});
 
-// Generate data for all pollutants and calculate overall air quality
-const generateChartData = (length) => {
-    const o3Data = generateSampleData(length);
-    const coData = generateSampleData(length);
-    const so2Data = generateSampleData(length);
+    const o3Data = [];
+    const coData = [];
+    const so2Data = [];
 
-    // Calculate overall air quality level as the maximum of all pollutants
+    props.dates.forEach((date) => {
+        const components = dataByDate[date];
+        if (components) {
+            o3Data.push(
+                Number(components.O3) === 0
+                    ? 0
+                    : components.O3 in airQualityMap
+                    ? airQualityMap[components.O3]
+                    : null
+            );
+            coData.push(
+                Number(components.CO) === 0
+                    ? 0
+                    : components.CO in airQualityMap
+                    ? airQualityMap[components.CO]
+                    : null
+            );
+            so2Data.push(
+                Number(components.SO2) === 0
+                    ? 0
+                    : components.SO2 in airQualityMap
+                    ? airQualityMap[components.SO2]
+                    : null
+            );
+        } else {
+            o3Data.push(null);
+            coData.push(null);
+            so2Data.push(null);
+        }
+    });
+
     const overallAirQuality = o3Data.map((o3, index) => {
-        return Math.max(o3, coData[index], so2Data[index]);
+        const co = coData[index];
+        const so2 = so2Data[index];
+        const values = [];
+        if (o3 !== null) values.push(o3);
+        if (co !== null) values.push(co);
+        if (so2 !== null) values.push(so2);
+
+        if (values.length === 0) {
+            return null;
+        }
+        return Math.max(...values);
     });
 
     return {
@@ -38,7 +98,7 @@ const generateChartData = (length) => {
         so2Data,
         overallAirQuality,
     };
-};
+});
 
 const airQualityLevels = computed(() => [
     t("GOOD"),
@@ -50,8 +110,7 @@ const airQualityLevels = computed(() => [
 ]);
 
 const options = computed(() => {
-    const dataLength = props.dates.length || 31;
-    const chartData = generateChartData(dataLength);
+    const data = chartData.value;
 
     // Color mapping for air quality levels
     const airQualityColors = [
@@ -64,40 +123,37 @@ const options = computed(() => {
     ];
 
     // Create data points with individual colors for the overall air quality line
-    const overallAirQualityWithColors = chartData.overallAirQuality.map(
-        (value, index) => ({
-            y: value,
-            color: airQualityColors[value] || "#888888",
-        })
-    );
+    const overallAirQualityWithColors = data.overallAirQuality.map((value) => ({
+        y: value,
+        color: airQualityColors[value] || "#888888",
+    }));
 
     return {
         xAxis: {
-            categories: props.dates.length
-                ? formattedDates.value
-                : Array.from({ length: dataLength }, (_, i) => `Day ${i + 1}`),
+            categories: formattedDates.value,
             title: {
                 text: t("date"),
             },
         },
         yAxis: {
-            categories: airQualityLevels.value,
+            categories: [
+                "",
+                t("GOOD"),
+                t("SATISFACTORY"),
+                t("MODERATE"),
+                t("POOR"),
+                t("SEVERE"),
+                t("HAZARDOUS"),
+            ],
             title: {
                 text: t("air_quality_level"),
             },
-            labels: {
-                formatter: function () {
-                    return airQualityLevels.value[this.value] || this.value;
-                },
-            },
-            max: 4, // Limit to 0-4 (a-e)
             min: 0,
+            max: 6,
         },
         plotOptions: {
             column: {
                 stacking: "normal",
-                pointPadding: 0.1,
-                borderWidth: 0,
             },
         },
         tooltip: {
@@ -111,16 +167,14 @@ const options = computed(() => {
                 const pointIndex = this.points[0]?.point?.index;
                 if (
                     pointIndex !== undefined &&
-                    chartData.overallAirQuality[pointIndex] !== undefined
+                    data.overallAirQuality[pointIndex] !== undefined
                 ) {
                     const overallLevel =
                         airQualityLevels.value[
-                            chartData.overallAirQuality[pointIndex]
+                            data.overallAirQuality[pointIndex] - 1
                         ];
                     const overallColor =
-                        airQualityColors[
-                            chartData.overallAirQuality[pointIndex]
-                        ];
+                        airQualityColors[data.overallAirQuality[pointIndex]];
                     tooltip += `<span style="color:${overallColor}">●</span> <b>${t(
                         "overall_air_quality"
                     )}: ${overallLevel}</b><br/><br/>`;
@@ -129,7 +183,7 @@ const options = computed(() => {
                 this.points.forEach((point) => {
                     if (point.series.name !== t("overall_air_quality")) {
                         const level =
-                            airQualityLevels.value[point.y] || point.y;
+                            airQualityLevels.value[point.y - 1] || point.y;
                         tooltip += `<span style="color:${point.color}">●</span> ${point.series.name}: <b>${level}</b><br/>`;
                     }
                 });
@@ -140,20 +194,20 @@ const options = computed(() => {
         series: [
             {
                 type: "column",
-                name: "O₃",
-                data: chartData.o3Data,
+                name: "O3",
+                data: data.o3Data,
                 color: "var(--ma-chart-color-app-rating-3)",
             },
             {
                 type: "column",
                 name: "CO",
-                data: chartData.coData,
+                data: data.coData,
                 color: "var(--ma-chart-color-app-rating-2)",
             },
             {
                 type: "column",
-                name: "SO₂",
-                data: chartData.so2Data,
+                name: "SO2",
+                data: data.so2Data,
                 color: "var(--ma-chart-color-app-rating-1)",
             },
             {
@@ -177,7 +231,22 @@ const options = computed(() => {
 
 <template>
     <div
-        v-if="!props.dates || props.dates.length === 0"
+        v-if="loading"
+        class="flex flex-col items-center justify-center w-full h-full rounded-lg min-h-96 px-16"
+    >
+        <MaIcon size="xl" name="loader" class="animate-spin" />
+        <p class="text-lg font-semibold text-gray-600">Loading...</p>
+    </div>
+    <div
+        v-else-if="error"
+        class="flex flex-col items-center justify-center w-full h-full rounded-lg min-h-96 px-16"
+    >
+        <MaIcon size="xl" name="error" />
+        <p class="text-lg font-semibold text-red-600">Error fetching data</p>
+        <p class="text-gray-500">{{ error.message }}</p>
+    </div>
+    <div
+        v-else-if="!props.dates || props.dates.length === 0"
         class="flex flex-col items-center justify-center w-full h-full rounded-lg min-h-96 px-16"
     >
         <MaIcon size="xl" name="404" />

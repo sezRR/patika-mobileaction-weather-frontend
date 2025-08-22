@@ -27,9 +27,11 @@ import Tokyo from "@/assets/maps/tokyo.webp";
 import MaCustomChart from "./components/chart/MaCustomChart.vue";
 import MaAlertContainer from "./components/MaAlertContainer.vue";
 import { useAlerts } from "@/composables/useAlerts";
+import { usePollutionData } from "@/composables/usePollutionData";
 
 const { t, locale, d } = useI18n();
-const { addAlert } = useAlerts();
+const { pollutionData, loading, error, fetchPollutionData } =
+    usePollutionData();
 
 dayjs.extend(localizedFormat);
 
@@ -39,21 +41,26 @@ watch(locale, (newLocale) => {
     document.cookie = `PATIKA_MA_WEATHER_LOCALE=${cookieValue};path=/;max-age=31536000`;
 });
 
-// const triggerAlert = () => {
-//     addAlert({
-//         title: "New Alert!",
-//         message: "This is a new alert.",
-//         type: "success",
-//         duration: 1000,
-//     });
-// };
-
 const dateRange = ref([
     dayjs().subtract(1, "week").format("YYYY-MM-DD"),
     dayjs().subtract(1, "day").format("YYYY-MM-DD"),
 ]);
 
 const selectedCity = ref("ankara");
+
+watch(
+    [selectedCity, dateRange],
+    () => {
+        if (dateRange.value.length === 2) {
+            fetchPollutionData(
+                selectedCity.value,
+                dayjs(dateRange.value[0]).format("YYYY-MM-DD"),
+                dayjs(dateRange.value[1]).format("YYYY-MM-DD")
+            );
+        }
+    },
+    { immediate: true }
+);
 
 /* --- build an array of all dates between start & end (inclusive) --- */
 const daysInRange = computed(() => {
@@ -110,12 +117,11 @@ const handleSelectionChange = (newSelectedDates) => {
                             v-model="dateRange"
                             :range="true"
                             :multiCalendars="true"
-                            :format="
-                                locale === 'tr' ? 'D MMMM YYYY' : 'MMMM D, YYYY'
-                            "
                             :placeholder="`${t('start_date')} – ${t(
                                 'end_date'
                             )}`"
+                            valueFormat="YYYY-MM-DD"
+                            :teleport="false"
                         />
                     </div>
                     <div class="flex gap-2 justify-center items-center flex-1">
@@ -177,7 +183,12 @@ const handleSelectionChange = (newSelectedDates) => {
                 />
             </MaRadioGroup>
             <div class="flex flex-col gap-2 justify-center items-center flex-1">
-                <MaCustomChart :dates="filteredDates" />
+                <MaCustomChart
+                    :dates="filteredDates"
+                    :pollutionData="pollutionData"
+                    :loading="loading"
+                    :error="error"
+                />
             </div>
             <MaFilterContainer @selection-change="handleSelectionChange">
                 <MaFilter v-for="day in daysInRange" :key="day" :date="day">
