@@ -10,6 +10,8 @@ import {
 import MaLabel from "../MaLabel.vue";
 import MaFilterQuickActions from "./MaFilterQuickActions.vue";
 
+const emit = defineEmits(["selection-change"]);
+
 const slots = useSlots();
 const ITEMS_PER_PAGE = 7;
 
@@ -71,6 +73,18 @@ watch(
         }
     },
     { immediate: true } // Run immediately on mount
+);
+
+const selectedDates = computed(() =>
+    [...selected.value].map((idx) => allChildren.value[idx].props.date)
+);
+
+watch(
+    selectedDates,
+    (newDates) => {
+        emit("selection-change", newDates);
+    },
+    { deep: true }
 );
 
 function toggleSingle(idx, event) {
@@ -292,6 +306,7 @@ const placeholderCount = computed(
                     @select-one-week="selectOneWeek"
                     @select-one-month="selectOneMonth"
                     @select-one-year="selectOneYear"
+                    @selection-change="$emit('selection-change', $event)"
                 />
             </div>
         </div>
