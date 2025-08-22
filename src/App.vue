@@ -39,14 +39,14 @@ watch(locale, (newLocale) => {
     document.cookie = `PATIKA_MA_WEATHER_LOCALE=${cookieValue};path=/;max-age=31536000`;
 });
 
-const triggerAlert = () => {
-    addAlert({
-        title: "New Alert!",
-        message: "This is a new alert.",
-        type: "success",
-        duration: 1000,
-    });
-};
+// const triggerAlert = () => {
+//     addAlert({
+//         title: "New Alert!",
+//         message: "This is a new alert.",
+//         type: "success",
+//         duration: 1000,
+//     });
+// };
 
 const dateRange = ref([
     dayjs().subtract(1, "week").format("YYYY-MM-DD"),
@@ -138,7 +138,7 @@ const handleSelectionChange = (newSelectedDates) => {
                 </div>
             </div>
             <div class="flex flex-col gap-2 justify-center items-center flex-1">
-                <MaButton @click="triggerAlert">Trigger Alert</MaButton>
+                <!-- <MaButton @click="triggerAlert">Trigger Alert</MaButton> -->
                 <MaCustomChart :dates="filteredDates" />
             </div>
             <MaFilterContainer @selection-change="handleSelectionChange">

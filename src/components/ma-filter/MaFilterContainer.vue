@@ -7,11 +7,15 @@ import {
     onBeforeUnmount,
     watch,
 } from "vue";
+import { useI18n } from "vue-i18n";
 import MaLabel from "../MaLabel.vue";
 import MaFilterQuickActions from "./MaFilterQuickActions.vue";
+import { useAlerts } from "../../composables/useAlerts";
 
 const emit = defineEmits(["selection-change"]);
 
+const { t } = useI18n();
+const { addAlert } = useAlerts();
 const slots = useSlots();
 const ITEMS_PER_PAGE = 7;
 
@@ -100,6 +104,12 @@ function toggleSingle(idx, event) {
             if (baseIsSelected) {
                 if (selected.value.size < MAX_SELECTION_DAYS) {
                     selected.value.add(i);
+                } else {
+                    addAlert({
+                        type: "warning",
+                        message: t("max_30_days_selection"),
+                    });
+                    break;
                 }
             } else {
                 selected.value.delete(i);
@@ -110,6 +120,11 @@ function toggleSingle(idx, event) {
             selected.value.delete(idx);
         } else if (selected.value.size < MAX_SELECTION_DAYS) {
             selected.value.add(idx);
+        } else {
+            addAlert({
+                type: "warning",
+                message: t("max_30_days_selection"),
+            });
         }
     }
     lastClickedIdx.value = idx;
@@ -119,11 +134,21 @@ function toggleSingle(idx, event) {
 const selectAll = () => {
     const newSelected = new Set();
     const allIndices = allChildren.value.map((_, i) => i);
+    let limitReached = false;
     for (const index of allIndices) {
-        if (newSelected.size >= MAX_SELECTION_DAYS) break;
+        if (newSelected.size >= MAX_SELECTION_DAYS) {
+            limitReached = true;
+            break;
+        }
         newSelected.add(index);
     }
     selected.value = newSelected;
+    if (limitReached) {
+        addAlert({
+            type: "warning",
+            message: t("max_30_days_selection"),
+        });
+    }
 };
 
 const selectCurrentPage = () => {
@@ -132,11 +157,21 @@ const selectCurrentPage = () => {
         (_, localIdx) => currentPageStart + localIdx
     );
     // Merge with existing selections instead of replacing
+    let limitReached = false;
     currentPageIndices.forEach((idx) => {
         if (selected.value.size < MAX_SELECTION_DAYS) {
             selected.value.add(idx);
+        } else {
+            limitReached = true;
         }
     });
+
+    if (limitReached) {
+        addAlert({
+            type: "warning",
+            message: t("max_30_days_selection"),
+        });
+    }
 };
 
 const removeAll = () => selected.value.clear();
@@ -184,11 +219,21 @@ const selectOneWeek = () => {
         (_, i) => currentPageStart + i
     );
     // Merge with existing selections instead of replacing
+    let limitReached = false;
     weekIndices.forEach((idx) => {
         if (selected.value.size < MAX_SELECTION_DAYS) {
             selected.value.add(idx);
+        } else {
+            limitReached = true;
         }
     });
+
+    if (limitReached) {
+        addAlert({
+            type: "warning",
+            message: t("max_30_days_selection"),
+        });
+    }
 };
 
 const selectOneMonth = () => {
@@ -198,11 +243,21 @@ const selectOneMonth = () => {
         (_, i) => currentPageStart + i
     );
     // Merge with existing selections instead of replacing
+    let limitReached = false;
     monthIndices.forEach((idx) => {
         if (selected.value.size < MAX_SELECTION_DAYS) {
             selected.value.add(idx);
+        } else {
+            limitReached = true;
         }
     });
+
+    if (limitReached) {
+        addAlert({
+            type: "warning",
+            message: t("max_30_days_selection"),
+        });
+    }
 };
 
 /* ---------- placeholders keep layout fixed ----------------------------- */

@@ -37,5 +37,6 @@
     "no_data_to_display": "No data to display",
     "no_data_to_display_description": "Select a date from the filter to see the chart",
     "start_date": "Start Date",
-    "end_date": "End Date"
+    "end_date": "End Date",
+    "max_30_days_selection": "You can select a maximum of 30 days."
 }
