@@ -99,7 +99,9 @@ const handleSelectionChange = (newSelectedDates) => {
                             :format="
                                 locale === 'tr' ? 'D MMMM YYYY' : 'MMMM D, YYYY'
                             "
-                            placeholder="Start Date – End Date"
+                            :placeholder="`${t('start_date')} – ${t(
+                                'end_date'
+                            )}`"
                         />
                     </div>
                     <div class="flex gap-2 justify-center items-center flex-1">

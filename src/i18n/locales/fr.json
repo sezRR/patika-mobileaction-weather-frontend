@@ -35,5 +35,7 @@
     "one_year": "1a",
     "selected": "sélectionné",
     "no_data_to_display": "Aucune donnée à afficher",
-    "no_data_to_display_description": "Sélectionnez une date dans le filtre pour voir le graphique"
+    "no_data_to_display_description": "Sélectionnez une date dans le filtre pour voir le graphique",
+    "start_date": "Date de début",
+    "end_date": "Date de fin"
 }
