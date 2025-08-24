@@ -235,15 +235,17 @@ const options = computed(() => {
         class="flex flex-col items-center justify-center w-full h-full rounded-lg min-h-96 px-16"
     >
         <MaIcon size="xl" name="loader" class="animate-spin" />
-        <p class="text-lg font-semibold text-gray-600">Loading...</p>
+        <p class="text-lg font-semibold text-gray-600">{{ t("loading") }}</p>
     </div>
     <div
         v-else-if="error"
         class="flex flex-col items-center justify-center w-full h-full rounded-lg min-h-96 px-16"
     >
         <MaIcon size="xl" name="error" />
-        <p class="text-lg font-semibold text-red-600">Error fetching data</p>
-        <p class="text-gray-500">{{ error.message }}</p>
+        <p class="text-lg font-semibold text-red-600">
+            {{ t("error_fetching_data") }}
+        </p>
+        <p class="text-gray-500">{{ t("unexpected_error") }}</p>
     </div>
     <div
         v-else-if="!props.dates || props.dates.length === 0"

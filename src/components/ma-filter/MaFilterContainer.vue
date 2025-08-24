@@ -19,7 +19,7 @@ const { addAlert } = useAlerts();
 const slots = useSlots();
 const ITEMS_PER_PAGE = 7;
 
-/* ---------- flatten default slot --------------------------------------- */
+/* flatten default slot */
 const allChildren = computed(() => {
     const raw = slots.default?.() ?? [];
     return raw.length === 1 && typeof raw[0].type === "symbol"
@@ -27,7 +27,7 @@ const allChildren = computed(() => {
         : raw;
 });
 
-/* ---------- pagination -------------------------------------------------- */
+/* pagination */
 const currentPage = ref(0);
 const totalPages = computed(() =>
     Math.ceil(allChildren.value.length / ITEMS_PER_PAGE)
@@ -37,7 +37,7 @@ const paginatedChildren = computed(() => {
     return allChildren.value.slice(start, start + ITEMS_PER_PAGE);
 });
 
-/* ---------- navigation helpers ----------------------------------------- */
+/* navigation helpers */
 function next() {
     if (currentPage.value < totalPages.value - 1) ++currentPage.value;
 }
@@ -59,7 +59,7 @@ function onKey(e) {
 onMounted(() => document.addEventListener("keydown", onKey));
 onBeforeUnmount(() => document.removeEventListener("keydown", onKey));
 
-/* ---------- selection logic -------------------------------------------- */
+/* selection logic */
 const selected = ref(new Set()); // stores global indices
 const lastClickedIdx = ref(null); // last clicked index
 
@@ -68,9 +68,7 @@ watch(
     () => allChildren.value.length,
     (newLength) => {
         if (newLength > 0) {
-            // Reset to page 0 when date range changes
             currentPage.value = 0;
-            // Select all items in the new range
             const selectionCount = Math.min(newLength, MAX_SELECTION_DAYS);
             selected.value = new Set(
                 Array.from({ length: selectionCount }, (_, i) => i)
@@ -95,7 +93,7 @@ watch(
 const MAX_SELECTION_DAYS = 90;
 
 function toggleSingle(idx, event) {
-    /* decide action based on *previous* item’s current state */
+    /* decide action based on previous item’s current state */
     if (event.shiftKey && lastClickedIdx.value !== null) {
         const [start, end] = [idx, lastClickedIdx.value].sort((a, b) => a - b);
         const baseIsSelected = selected.value.has(lastClickedIdx.value);
@@ -130,7 +128,7 @@ function toggleSingle(idx, event) {
     lastClickedIdx.value = idx;
 }
 
-/* ---------- bulk toolbar ----------------------------------------------- */
+/* bulk toolbar */
 const selectAll = () => {
     const newSelected = new Set();
     const allIndices = allChildren.value.map((_, i) => i);
@@ -185,7 +183,7 @@ const removeCurrentPage = () => {
     currentPageIndices.forEach((idx) => selected.value.delete(idx));
 };
 
-/* ---------- computed disable states ------------------------------------ */
+/* computed disable states */
 const isAllSelected = computed(
     () =>
         selected.value.size === allChildren.value.length &&
@@ -260,7 +258,7 @@ const selectOneMonth = () => {
     }
 };
 
-/* ---------- placeholders keep layout fixed ----------------------------- */
+/* placeholders keep layout fixed */
 const placeholderCount = computed(
     () => ITEMS_PER_PAGE - paginatedChildren.value.length
 );
@@ -268,11 +266,8 @@ const placeholderCount = computed(
 
 <template>
     <div class="flex flex-col gap-2">
-        <!-- header aligned with filter items --------------------------------- -->
         <div class="flex items-center gap-2 w-96 min-w-96">
-            <!-- spacer for pagination buttons to align header with filter items -->
             <div class="flex gap-2">
-                <!-- invisible spacers matching pagination button widths -->
                 <div class="px-2 opacity-0 pointer-events-none select-none">
                     ‹‹
                 </div>
@@ -283,9 +278,9 @@ const placeholderCount = computed(
             <MaLabel>Filter dates</MaLabel>
         </div>
 
-        <!-- filter strip ----------------------------------------------------- -->
+        <!-- filter strip --------------------------------------------------- -->
         <div class="flex flex-wrap items-center gap-2">
-            <!-- ‹‹ (go to first) - always visible -->
+            <!-- ‹‹ (go to first) -->
             <button
                 class="px-2 text-stone-400 disabled:opacity-40 hover:text-stone-600 disabled:hover:text-stone-400"
                 :disabled="currentPage === 0 || totalPages <= 1"
@@ -295,7 +290,6 @@ const placeholderCount = computed(
                 ‹‹
             </button>
 
-            <!-- ‹ (previous) - always visible -->
             <button
                 class="px-2 text-stone-400 disabled:opacity-40 hover:text-stone-600 disabled:hover:text-stone-400"
                 :disabled="currentPage === 0 || totalPages <= 1"
@@ -305,7 +299,6 @@ const placeholderCount = computed(
                 ‹
             </button>
 
-            <!-- visible filters -->
             <template
                 v-for="(child, localIdx) in paginatedChildren"
                 :key="localIdx + currentPage * ITEMS_PER_PAGE"
@@ -324,14 +317,12 @@ const placeholderCount = computed(
                 />
             </template>
 
-            <!-- invisible placeholders keep height identical ------------------ -->
             <div
                 v-for="n in placeholderCount"
                 :key="'ph' + n"
                 class="opacity-0 pointer-events-none select-none w-28"
             ></div>
 
-            <!-- › (next) - always visible -->
             <button
                 class="px-2 text-stone-400 disabled:opacity-40 hover:text-stone-600 disabled:hover:text-stone-400"
                 :disabled="currentPage === totalPages - 1 || totalPages <= 1"
@@ -341,7 +332,6 @@ const placeholderCount = computed(
                 ›
             </button>
 
-            <!-- ›› (go to last) - always visible -->
             <button
                 class="px-2 text-stone-400 disabled:opacity-40 hover:text-stone-600 disabled:hover:text-stone-400"
                 :disabled="currentPage === totalPages - 1 || totalPages <= 1"
@@ -352,11 +342,8 @@ const placeholderCount = computed(
             </button>
         </div>
 
-        <!-- footer bar aligned with filter items ---------------------------- -->
         <div class="flex items-center gap-2">
-            <!-- spacer for pagination buttons to align footer with filter items -->
             <div class="flex gap-2">
-                <!-- invisible spacers matching pagination button widths -->
                 <div class="px-2 opacity-0 pointer-events-none select-none">
                     ‹‹
                 </div>

@@ -28,10 +28,12 @@ import MaCustomChart from "./components/chart/MaCustomChart.vue";
 import MaAlertContainer from "./components/MaAlertContainer.vue";
 import { useAlerts } from "@/composables/useAlerts";
 import { usePollutionData } from "@/composables/usePollutionData";
+import { useBackendHealth } from "@/composables/useBackendHealth";
 
 const { t, locale, d } = useI18n();
 const { pollutionData, loading, error, fetchPollutionData } =
     usePollutionData();
+const { isOnline: backendIsOnline } = useBackendHealth();
 
 dayjs.extend(localizedFormat);
 
@@ -111,7 +113,7 @@ const handleSelectionChange = (newSelectedDates) => {
                     />
                 </div>
                 <div className="flex flex-col gap-2 col-start-3">
-                    <MaBackendStatusBadge :isOnline="true" />
+                    <MaBackendStatusBadge :isOnline="backendIsOnline" />
                     <div class="flex flex-col gap-1">
                         <MaDatePicker2
                             v-model="dateRange"

@@ -6,7 +6,6 @@ const slots = useSlots();
 const renderedChildren = computed(() => {
     const children = slots.default?.() ?? [];
 
-    // If no slots provided, render plain text as a VNode
     if (children.length === 0) {
         return [h("span", "Label")];
     }

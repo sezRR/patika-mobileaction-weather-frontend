@@ -92,7 +92,6 @@ const isMonthAvailable = computed(() => props.totalItems >= 30);
                 </button>
             </template>
 
-            <!-- More actions section -->
             <template v-if="isWeekAvailable || isMonthAvailable">
                 <span>·</span>
                 <span class="text-stone-400"
