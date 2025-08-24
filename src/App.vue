@@ -7,6 +7,8 @@ import {
 } from "@mobileaction/action-kit";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import "dayjs/locale/tr";
 import "dayjs/locale/fr";
 import { ref, computed, watch } from "vue";
@@ -26,16 +28,22 @@ import Mumbai from "@/assets/maps/mumbai.webp";
 import Tokyo from "@/assets/maps/tokyo.webp";
 import MaCustomChart from "./components/chart/MaCustomChart.vue";
 import MaAlertContainer from "./components/MaAlertContainer.vue";
-import { useAlerts } from "@/composables/useAlerts";
 import { usePollutionData } from "@/composables/usePollutionData";
 import { useBackendHealth } from "@/composables/useBackendHealth";
 
 const { t, locale, d } = useI18n();
-const { pollutionData, loading, error, fetchPollutionData } =
-    usePollutionData();
+const {
+    pollutionData,
+    loading,
+    error,
+    fetchPollutionData,
+    clearPollutionData,
+} = usePollutionData();
 const { isOnline: backendIsOnline } = useBackendHealth();
 
 dayjs.extend(localizedFormat);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 watch(locale, (newLocale) => {
     dayjs.locale(newLocale);
@@ -50,18 +58,82 @@ const dateRange = ref([
 
 const selectedCity = ref("ankara");
 
+// Store the current selected dates from the filter
+const currentSelectedDates = ref([]);
+const isInitialLoad = ref(true);
+
 watch(
     [selectedCity, dateRange],
-    () => {
+    async () => {
         if (dateRange.value.length === 2) {
-            fetchPollutionData(
+            // Store the current selected dates before clearing
+            const previouslySelectedDates = [...currentSelectedDates.value];
+
+            // Clear existing data cache when city or date range changes
+            clearPollutionData();
+            isInitialLoad.value = true;
+
+            // Always fetch the full date range data first
+            await fetchPollutionData(
                 selectedCity.value,
                 dayjs(dateRange.value[0]).format("YYYY-MM-DD"),
-                dayjs(dateRange.value[1]).format("YYYY-MM-DD")
+                dayjs(dateRange.value[1]).format("YYYY-MM-DD"),
+                null // Don't use selected dates for initial load
             );
+
+            // If there were previously selected dates, validate them against the new range and fetch additional data if needed
+            if (previouslySelectedDates.length > 0) {
+                const startDate = dayjs(dateRange.value[0]);
+                const endDate = dayjs(dateRange.value[1]);
+                const validSelectedDates = previouslySelectedDates.filter(
+                    (date) => {
+                        const dateObj = dayjs(date);
+                        return (
+                            dateObj.isSameOrAfter(startDate) &&
+                            dateObj.isSameOrBefore(endDate)
+                        );
+                    }
+                );
+
+                if (validSelectedDates.length > 0) {
+                    // Restore the valid selected dates
+                    currentSelectedDates.value = validSelectedDates;
+                    // Fetch additional data for these specific dates
+                    await fetchPollutionData(
+                        selectedCity.value,
+                        dayjs(dateRange.value[0]).format("YYYY-MM-DD"),
+                        dayjs(dateRange.value[1]).format("YYYY-MM-DD"),
+                        validSelectedDates
+                    );
+                }
+            }
+
+            isInitialLoad.value = false;
         }
     },
     { immediate: true }
+);
+
+// Watch for changes in selected filter dates and refetch data
+watch(
+    () => currentSelectedDates.value,
+    (newSelectedDates) => {
+        // Only trigger API call if it's not the initial load and we have selected dates
+        // and this change is from user interaction (not from city change)
+        if (
+            !isInitialLoad.value &&
+            dateRange.value.length === 2 &&
+            newSelectedDates.length > 0
+        ) {
+            fetchPollutionData(
+                selectedCity.value,
+                dayjs(dateRange.value[0]).format("YYYY-MM-DD"),
+                dayjs(dateRange.value[1]).format("YYYY-MM-DD"),
+                newSelectedDates
+            );
+        }
+    },
+    { deep: true }
 );
 
 /* --- build an array of all dates between start & end (inclusive) --- */
@@ -82,6 +154,19 @@ const daysInRange = computed(() => {
 
 const filteredDates = ref([]);
 
+// Create separate arrays for cache vs display
+const chartDisplayData = computed(() => {
+    if (filteredDates.value.length === 0) {
+        // If no dates are selected in filter, show no data
+        return [];
+    }
+
+    // Filter the cached pollution data to only include selected dates
+    return pollutionData.value.filter((item) =>
+        filteredDates.value.includes(item.date)
+    );
+});
+
 watch(
     daysInRange,
     (newDays) => {
@@ -91,7 +176,12 @@ watch(
 );
 
 const handleSelectionChange = (newSelectedDates) => {
-    filteredDates.value = newSelectedDates;
+    // Sort dates descendingly to ensure chart is always ordered correctly
+    filteredDates.value = newSelectedDates.sort((a, b) =>
+        dayjs(b).diff(dayjs(a))
+    );
+    currentSelectedDates.value = newSelectedDates;
+    isInitialLoad.value = false; // Mark that we're no longer in initial load state
 };
 </script>
 
@@ -187,7 +277,7 @@ const handleSelectionChange = (newSelectedDates) => {
             <div class="flex flex-col gap-2 justify-center items-center flex-1">
                 <MaCustomChart
                     :dates="filteredDates"
-                    :pollutionData="pollutionData"
+                    :pollutionData="chartDisplayData"
                     :loading="loading"
                     :error="error"
                 />
